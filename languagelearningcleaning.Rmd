@@ -1,0 +1,45 @@
+---
+title: "test"
+author: "Tony Ni"
+date: "10/20/2020"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+languagelearning_raw <- read_csv("languagelearning_raw.csv")
+
+languagelearning_trimmed <- languagelearning_raw %>%
+  select(-c("X1", "id", "date", "time", "tests", "countries", "US_region",
+            "UK_region", "Can_region", "Ir_region", "UK_constituency",
+            "prime_Eng", 32:126, 128)) %>%
+  na.omit() %>%
+  mutate(id = row_number()) %>%
+  select(21, 1:20) %>%
+  mutate(age_group = case_when(
+    age < 18 ~ "< 18",
+    age >= 18 & age < 30 ~ "18-29",
+    age >= 30 & age < 45 ~ "30-44",
+    age >= 45 & age < 61 ~ "45-60",
+    age > 60 ~ "> 60")) %>%
+  mutate(age_group = factor(age_group, 
+                            levels = c("< 18", "18-29", 
+                                       "30-44", "45-60", 
+                                       "> 60"))) %>%  
+  mutate(skill_group = case_when(
+    correct < 0.8 ~ "< 0.80",
+    correct >= 0.8 & correct <= 0.95 ~ "0.8-0.95",
+    correct > 0.95 ~ "> 0.95")) %>%
+  mutate(skill_group = factor(skill_group, 
+                            levels = c("< 0.80", "0.8-0.95", 
+                                       "> 0.95"))) %>%
+  select(-c("Ebonics")) %>%
+  select(c(1, 2, 3, 21, 4:20, 22))
+
+write.csv(languagelearning_trimmed, "languagelearning_cleaned.csv", fileEncoding = "UTF-8")
+```
+
